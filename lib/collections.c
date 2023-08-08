@@ -165,9 +165,10 @@ typedef struct List
     size_t length;
     size_t max_length;
     void** data;
+    void (*free_function)(void*);
 } List;
 
-List* list_init(void)
+List* list_init(void (*free_function)(void*))
 {
     List* list = malloc(sizeof(List));
     if (list == NULL)
@@ -177,6 +178,7 @@ List* list_init(void)
     }
     list->length = 0;
     list->max_length = INITIAL_LIST_MAX_LENGTH;
+    list->free_function = free_function;
     list->data = malloc(INITIAL_LIST_MAX_LENGTH * sizeof(void*));
     if (list->data == NULL)
     {
