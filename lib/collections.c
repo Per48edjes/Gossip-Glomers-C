@@ -288,13 +288,9 @@ typedef struct Dictionary
     size_t length;
 } Dictionary;
 
-typedef struct DictionaryLookupResult
-{
-    bool found;
-    size_t index;
-} DictionaryLookupResult;
-
-Dictionary* dictionary_init(void (*elem_free)(void*))
+// TODO: Abstract out linear probing function
+// lookup_key(char *key) -> index or -1 if not found
+Dictionary* dictionary_init(void)
 {
     Dictionary* dictionary = malloc(sizeof(Dictionary));
     if (dictionary == NULL)
