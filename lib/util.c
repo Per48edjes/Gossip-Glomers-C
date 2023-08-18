@@ -1,6 +1,5 @@
 #include "util.h"
 #include "json-c/json_object.h"
-#include "stopwatch.h"
 
 #include <errno.h>
 #include <stdint.h>
@@ -73,6 +72,17 @@ getline_result_t getline_with_timeout(struct timeval* timeout)
             return result;
         }
     }
+
+    json_object* msg = json_tokener_parse(input_line);
+    if (msg == NULL)
+    {
+        fprintf(stderr, "Error: recv_msg: couldn't parse line as json\n");
+        free(input_line);
+        exit(EXIT_FAILURE);
+    }
+
+    free(input_line);
+    return msg;
 }
 
 msg_recv_result_t msg_recv_with_timeout(struct timeval* timeout)
@@ -210,7 +220,7 @@ const char** node_ids(json_object* init_msg)
     return peers;
 }
 
-size_t node_ids_count(json_object* init_msg)
+const size_t node_ids_count(json_object* init_msg)
 {
     json_object* body = json_object_object_get(init_msg, "body");
     json_object* node_ids = json_object_object_get(body, "node_ids");
