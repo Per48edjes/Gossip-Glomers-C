@@ -220,7 +220,7 @@ const char** node_ids(json_object* init_msg)
     return peers;
 }
 
-const size_t node_ids_count(json_object* init_msg)
+size_t node_ids_count(json_object* init_msg)
 {
     json_object* body = json_object_object_get(init_msg, "body");
     json_object* node_ids = json_object_object_get(body, "node_ids");

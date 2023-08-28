@@ -31,7 +31,7 @@ int main(void)
     const char** peers = node_ids(init_msg);
     const size_t num_peers = node_ids_count(init_msg);
     tcp_init(peers, num_peers);
-    msg_send(init_reply(init_msg));
+    msg_send(generic_reply(init_msg));
     json_object_put(init_msg);
     if (is_leader)
     {
@@ -42,6 +42,7 @@ int main(void)
         follower_event_loop();
     }
     tcp_free(peers, num_peers);
+    free(peers);
 }
 
 void follower_event_loop()
@@ -73,7 +74,7 @@ void follower_event_loop()
 
 void leader_event_loop()
 {
-    Queue* conch_request_queue = queue_init(5000, queue_json_object_free);
+    Queue* conch_request_queue = queue_init(5, queue_json_object_free);
     Conch* conch = conch_init(0);
 
     json_object* msg;
@@ -93,7 +94,7 @@ void leader_event_loop()
             if (!conch_is_available(conch))
             {
                 fprintf(stderr, "Warn: leader_event_loop: shut down with "
-                                "unserved conch requests\n");
+                                "unreturned conch\n");
             }
 
             // Shutdown.
@@ -135,7 +136,9 @@ void leader_event_loop()
 }
 
 // Helper function for using `json_object`s in a `Queue`.
-void queue_json_object_free(void* obj) { json_object_put(obj); }
+void queue_json_object_free(void* obj) {
+    json_object_put(obj);
+}
 
 // Used exclusively by Leader
 // Takes ownership of `conch_request`.

@@ -111,8 +111,7 @@ void queue_free(Queue* queue)
     while (!queue_is_empty(queue))
     {
         void* data = queue_dequeue(queue);
-        if (queue->free_function)
-        {
+        if (queue->free_function) {
             queue->free_function(data);
         }
     }
