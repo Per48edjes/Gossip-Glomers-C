@@ -294,7 +294,7 @@ typedef struct DictionaryLookupResult
     size_t index;
 } DictionaryLookupResult;
 
-Dictionary* dictionary_init(void)
+Dictionary* dictionary_init(void (*elem_free)(void*))
 {
     Dictionary* dictionary = malloc(sizeof(Dictionary));
     if (dictionary == NULL)
@@ -406,7 +406,7 @@ void dictionary_set(Dictionary* dictionary, const char* key, void* value)
     else
     {
         // FIX: Leaked underlying queue in the ChannelState value
-        free(dictionary->key_value_pairs[lookup_result.index].value);
+        dictionary->elem_free(dictionary->key_value_pairs[lookup_result.index].value);
         dictionary->key_value_pairs[lookup_result.index].value = value;
         return;
     }
