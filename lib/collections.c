@@ -111,7 +111,8 @@ void queue_free(Queue* queue)
     while (!queue_is_empty(queue))
     {
         void* data = queue_dequeue(queue);
-        if (queue->free_function) {
+        if (queue->free_function)
+        {
             queue->free_function(data);
         }
     }
@@ -309,10 +310,9 @@ Dictionary* dictionary_init(void)
     return dictionary;
 }
 
-static DictionaryLookupResult dictionary_lookup(Dictionary* dictionary,
-                                                const char* key)
+static ssize_t dictionary_lookup(Dictionary* dictionary, const char* key)
 {
-    size_t index = hash_key(key) % dictionary->max_length;
+    ssize_t index = hash_key(key) % dictionary->max_length;
     while (dictionary->key_value_pairs[index].key != NULL)
     {
         if (strcmp(dictionary->key_value_pairs[index].key, key) == 0)
@@ -374,7 +374,7 @@ static void dictionary_rebuild(Dictionary* dictionary)
 
 void dictionary_set(Dictionary* dictionary, const char* key, void* value)
 {
-    DictionaryLookupResult lookup_result = dictionary_lookup(dictionary, key);
+    ssize_t index = dictionary_lookup(dictionary, key);
     // Key does not exist, add new KeyValuePair
     if (index == KEY_NOT_FOUND)
     {
@@ -407,7 +407,7 @@ void dictionary_set(Dictionary* dictionary, const char* key, void* value)
 
 void* dictionary_get(Dictionary* dictionary, const char* key)
 {
-    DictionaryLookupResult lookup_result = dictionary_lookup(dictionary, key);
+    ssize_t index = dictionary_lookup(dictionary, key);
     // Key successfully found, return value
     if (index != KEY_NOT_FOUND)
     {
