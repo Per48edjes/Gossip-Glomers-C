@@ -29,13 +29,14 @@ typedef struct Queue
     Node* tail;
     size_t length;
     size_t max_length;
+    void (*free_function)(void*);
 } Queue;
 
 bool queue_is_full(Queue* queue) { return queue->length == queue->max_length; }
 
 bool queue_is_empty(Queue* queue) { return queue->length == 0; }
 
-Queue* queue_init(size_t max_length)
+Queue* queue_init(size_t max_length, void (*free_function)(void*))
 {
     Queue* queue = malloc(sizeof(Queue));
     if (queue == NULL)
@@ -47,7 +48,18 @@ Queue* queue_init(size_t max_length)
     queue->length = 0;
     queue->head = NULL;
     queue->tail = NULL;
+    queue->free_function = free_function;
     return queue;
+}
+
+void* queue_peek(Queue* queue)
+{
+    if (!queue_is_empty(queue))
+    {
+        return queue->head->data;
+    }
+    fprintf(stderr, "Error: queue_peek: queue is empty\n");
+    exit(EXIT_FAILURE);
 }
 
 void queue_enqueue(Queue* queue, void* data)
@@ -98,7 +110,10 @@ void queue_free(Queue* queue)
     while (!queue_is_empty(queue))
     {
         void* data = queue_dequeue(queue);
-        free(data);
+        if (queue->free_function)
+        {
+            queue->free_function(data);
+        }
     }
     free(queue);
 }
@@ -268,11 +283,18 @@ static uint64_t hash_key(const char* key)
 typedef struct Dictionary
 {
     KeyValuePair* key_value_pairs;
+    void (*elem_free)(void*);
     size_t max_length;
     size_t length;
 } Dictionary;
 
-Dictionary* dictionary_init(void)
+typedef struct DictionaryLookupResult
+{
+    bool found;
+    size_t index;
+} DictionaryLookupResult;
+
+Dictionary* dictionary_init(void (*elem_free)(void*))
 {
     Dictionary* dictionary = malloc(sizeof(Dictionary));
     if (dictionary == NULL)
@@ -288,27 +310,30 @@ Dictionary* dictionary_init(void)
         exit(EXIT_FAILURE);
     }
     dictionary->max_length = INITIAL_DICTIONARY_MAX_LENGTH;
+    dictionary->elem_free = elem_free;
     dictionary->length = 0;
     return dictionary;
 }
 
-static uint64_t dictionary_lookup(Dictionary* dictionary, const char* key)
+static DictionaryLookupResult dictionary_lookup(Dictionary* dictionary,
+                                                const char* key)
 {
-    uint64_t index = hash_key(key) % dictionary->max_length;
+    size_t index = hash_key(key) % dictionary->max_length;
     while (dictionary->key_value_pairs[index].key != NULL)
     {
         if (strcmp(dictionary->key_value_pairs[index].key, key) == 0)
         {
-            return index;
+            return (DictionaryLookupResult){true, index};
         }
         index = (index + 1) % dictionary->max_length;
     }
-    return -1;
+    return (DictionaryLookupResult){false, index};
 }
 
 bool dictionary_contains(Dictionary* dictionary, const char* key)
 {
-    return dictionary_lookup(dictionary, key) != -1;
+    DictionaryLookupResult lookup_result = dictionary_lookup(dictionary, key);
+    return lookup_result.found;
 }
 
 static void dictionary_rebuild(Dictionary* dictionary)
@@ -356,9 +381,9 @@ static void dictionary_rebuild(Dictionary* dictionary)
 
 void dictionary_set(Dictionary* dictionary, const char* key, void* value)
 {
-    uint64_t index = dictionary_lookup(dictionary, key);
+    DictionaryLookupResult lookup_result = dictionary_lookup(dictionary, key);
     // Key does not exist, add new KeyValuePair
-    if (index == -1)
+    if (!lookup_result.found)
     {
         char* copied_key = key ? strdup(key) : NULL;
         if (copied_key == NULL)
@@ -373,27 +398,27 @@ void dictionary_set(Dictionary* dictionary, const char* key, void* value)
             exit(EXIT_FAILURE);
         }
         KeyValuePair key_value_pair = {copied_key, value};
-        dictionary_rebuild(dictionary);
-        index = dictionary_lookup(dictionary, key);
-        dictionary->key_value_pairs[index] = key_value_pair;
+        dictionary->key_value_pairs[lookup_result.index] = key_value_pair;
         dictionary->length++;
+        dictionary_rebuild(dictionary);
     }
     // Key already exists, just replace value (no need to free the key)
     else
     {
-        free(dictionary->key_value_pairs[index].value);
-        dictionary->key_value_pairs[index].value = value;
+        dictionary->elem_free(
+            dictionary->key_value_pairs[lookup_result.index].value);
+        dictionary->key_value_pairs[lookup_result.index].value = value;
         return;
     }
 }
 
 void* dictionary_get(Dictionary* dictionary, const char* key)
 {
-    uint64_t index = dictionary_lookup(dictionary, key);
+    DictionaryLookupResult lookup_result = dictionary_lookup(dictionary, key);
     // Key successfully found, return value
-    if (index != -1)
+    if (lookup_result.found)
     {
-        return dictionary->key_value_pairs[index].value;
+        return dictionary->key_value_pairs[lookup_result.index].value;
     }
     // Raise error if key not found
     else
@@ -416,7 +441,7 @@ void dictionary_free(Dictionary* dictionary)
         }
         if (key_value_pair.value != NULL)
         {
-            free(key_value_pair.value);
+            dictionary->elem_free(key_value_pair.value);
         }
     }
     free(dictionary->key_value_pairs);
