@@ -7,16 +7,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-void single_node_event_loop(const char* self, const char** peers,
-                            const int num_peers);
+void single_node_event_loop(const char** peers, const int num_peers);
 void list_json_object_free(void* obj);
 void broadcast_request_handler(json_object* client_request, List* message_list,
-                               const char* self, const char** peers,
-                               const int num_peers);
+                               const char** peers, const int num_peers);
 void forwarded_broadcast_handler(json_object* forwarded_msg,
                                  List* message_list);
 void read_request_handler(json_object* client_request, List* message_list);
 void topology_handler(json_object* topology_msg);
+
+List* NEIGHBORS;
+const char* SELF;
 
 int main(void)
 {
@@ -28,19 +29,20 @@ int main(void)
     }
     msg_send(generic_reply(init_msg));
 
-    const char* self = node_id(init_msg);
+    SELF = node_id(init_msg);
     const char** peers = node_ids(init_msg);
     const int num_peers = node_ids_count(init_msg);
     tcp_init(peers, num_peers);
+    NEIGHBORS = list_init(free);
 
-    single_node_event_loop(self, peers, num_peers);
+    single_node_event_loop(peers, num_peers);
 
     tcp_free();
+    list_free(NEIGHBORS);
     json_object_put(init_msg);
 }
 
-void single_node_event_loop(const char* self, const char** peers,
-                            const int num_peers)
+void single_node_event_loop(const char** peers, const int num_peers)
 {
     List* message_list = list_init(list_json_object_free);
 
@@ -51,8 +53,7 @@ void single_node_event_loop(const char* self, const char** peers,
 
         if (strcmp(type, "broadcast") == 0)
         {
-            broadcast_request_handler(msg, message_list, self, peers,
-                                      num_peers);
+            broadcast_request_handler(msg, message_list, peers, num_peers);
         }
         else if (strcmp(type, "forwarded") == 0)
         {
@@ -85,8 +86,7 @@ void list_json_object_free(void* obj) { json_object_put(obj); }
 
 // Takes ownership of `client_request`.
 void broadcast_request_handler(json_object* client_request, List* message_list,
-                               const char* self, const char** peers,
-                               const int num_peers)
+                               const char** peers, const int num_peers)
 {
     // Construct client response message
     json_object* broadcast_response = generic_reply(client_request);
@@ -104,7 +104,7 @@ void broadcast_request_handler(json_object* client_request, List* message_list,
     // Broadcast just-received message to all peers
     for (int i = 0; i < num_peers; i++)
     {
-        if (strcmp(peers[i], self) == 0)
+        if (strcmp(peers[i], SELF) == 0)
         {
             continue;
         }
@@ -167,10 +167,25 @@ void read_request_handler(json_object* client_request, List* message_list)
     json_object_put(client_request);
 }
 
-// WARN: Doesn't do anything right now other than send a `topology_ok`
-// response. Takes ownership of `topology_msg`.
+// Takes ownership of `topology_msg`.
 void topology_handler(json_object* topology_msg)
 {
+    // Construct neighbors array
+    json_object* topology = json_object_object_get(
+        json_object_object_get(topology_msg, "body"), "topology");
+    json_object* neighbors = json_object_object_get(topology, SELF);
+    size_t num_neighbors = json_object_array_length(neighbors);
+    for (size_t i = 0; i < num_neighbors; i++)
+    {
+        const char* neighbor =
+            json_object_get_string(json_object_array_get_idx(neighbors, i));
+        if (strcmp(SELF, neighbor) == 0)
+        {
+            continue;
+        }
+        list_append(NEIGHBORS, strdup(neighbor));
+    }
+
     // Construct topology response message
     json_object* topology_response = generic_reply(topology_msg);
 
