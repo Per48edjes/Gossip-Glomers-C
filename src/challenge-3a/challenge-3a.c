@@ -49,7 +49,7 @@ void single_node_event_loop()
         else
         {
             fprintf(stderr,
-                    "Error: follower_event_loop: unrecognized message type: "
+                    "Error: single_node_event_loop: unrecognized message type: "
                     "\"%s\"\n",
                     type);
             free(msg);
