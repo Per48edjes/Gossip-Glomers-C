@@ -43,11 +43,15 @@ json_object* uniq_id_reply(json_object* uniq_id_msg, const char* node_id,
 
     json_object* reply_uniq_id;
 
-    // Construct the unique id (node ID + logical timestamp)
+    // Stringify the logical timestamp
     char logical_timestamp[MAX_SIGNED_INT64_STRLEN + 1];
     sprintf(logical_timestamp, "%ld", (*logical_clock)++);
-    char uniq_id[strlen(node_id) + strlen(logical_timestamp) + 1];
-    strcat(stpcpy(uniq_id, node_id), logical_timestamp);
+
+    // Construct the unique id (node ID + logical timestamp)
+    char uniq_id[strlen(node_id) + strlen(logical_timestamp) + 2];
+    strcpy(uniq_id, node_id);
+    strcat(uniq_id, ":");
+    strcat(uniq_id, logical_timestamp);
 
     reply_uniq_id = json_object_new_string(uniq_id);
     json_object_object_add(json_object_object_get(reply, "body"), "id",
