@@ -4,7 +4,6 @@ LDFLAGS += $(shell pkg-config --libs json-c)
 SRC_DIR := src
 BUILD_DIR:= build
 LIB_DIR := lib
-TESTS_DIR := tests
 
 # Challenges executables
 CHALLENGES := challenge-1 challenge-2 challenge-3a challenge-3b
@@ -46,6 +45,9 @@ $(BUILD_DIR)/challenge-2.o: $(CHALLENGE_2_SRC) $(LIB_DIR)/util.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/challenge-3a.o: $(CHALLENGE_3a_SRC) $(LIB_DIR)/util.h $(LIB_DIR)/collections.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/challenge-3b.o: $(CHALLENGE_3b_SRC) $(LIB_DIR)/util.h $(LIB_DIR)/collections.h $(LIB_DIR)/tcp.h $(LIB_DIR)/stopwatch.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Generate object files for library modules
