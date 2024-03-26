@@ -6,20 +6,20 @@ BUILD_DIR:= build
 LIB_DIR := lib
 
 # Challenges executables
-CHALLENGES := challenge-1 challenge-2 challenge-3a challenge-3b
+CHALLENGES := challenge-1 challenge-2 challenge-3a challenge-3bc
 CHALLENGE_EXECS := $(patsubst %, $(BUILD_DIR)/%.out, $(CHALLENGES))
 
 # Challenges source files 
 CHALLENGE_1_SRC := $(SRC_DIR)/challenge-1/challenge-1.c
 CHALLENGE_2_SRC := $(SRC_DIR)/challenge-2/challenge-2.c
 CHALLENGE_3a_SRC := $(SRC_DIR)/challenge-3a/challenge-3a.c
-CHALLENGE_3b_SRC := $(SRC_DIR)/challenge-3b/challenge-3b.c
+CHALLENGE_3bc_SRC := $(SRC_DIR)/challenge-3bc/challenge-3bc.c
 
 # Challenges object files
 CHALLENGE_1_OBJS := $(patsubst $(SRC_DIR)/challenge-1/%.c, $(BUILD_DIR)/%.o, $(CHALLENGE_1_SRC))
 CHALLENGE_2_OBJS := $(patsubst $(SRC_DIR)/challenge-2/%.c, $(BUILD_DIR)/%.o, $(CHALLENGE_2_SRC))
 CHALLENGE_3a_OBJS := $(patsubst $(SRC_DIR)/challenge-3a/%.c, $(BUILD_DIR)/%.o, $(CHALLENGE_3a_SRC))
-CHALLENGE_3b_OBJS := $(patsubst $(SRC_DIR)/challenge-3b/%.c, $(BUILD_DIR)/%.o, $(CHALLENGE_3b_SRC))
+CHALLENGE_3bc_OBJS := $(patsubst $(SRC_DIR)/challenge-3bc/%.c, $(BUILD_DIR)/%.o, $(CHALLENGE_3bc_SRC))
 
 
 all: $(CHALLENGE_EXECS)
@@ -34,7 +34,7 @@ $(BUILD_DIR)/challenge-2.out: $(CHALLENGE_2_OBJS) $(BUILD_DIR)/util.o
 $(BUILD_DIR)/challenge-3a.out: $(CHALLENGE_3a_OBJS) $(BUILD_DIR)/util.o $(BUILD_DIR)/collections.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
-$(BUILD_DIR)/challenge-3b.out: $(CHALLENGE_3b_OBJS) $(BUILD_DIR)/util.o $(BUILD_DIR)/collections.o $(BUILD_DIR)/tcp.o $(BUILD_DIR)/stopwatch.o
+$(BUILD_DIR)/challenge-3bc.out: $(CHALLENGE_3bc_OBJS) $(BUILD_DIR)/util.o $(BUILD_DIR)/collections.o $(BUILD_DIR)/tcp.o $(BUILD_DIR)/stopwatch.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
 # Generate object files for challenges
@@ -47,7 +47,7 @@ $(BUILD_DIR)/challenge-2.o: $(CHALLENGE_2_SRC) $(LIB_DIR)/util.h
 $(BUILD_DIR)/challenge-3a.o: $(CHALLENGE_3a_SRC) $(LIB_DIR)/util.h $(LIB_DIR)/collections.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/challenge-3b.o: $(CHALLENGE_3b_SRC) $(LIB_DIR)/util.h $(LIB_DIR)/collections.h $(LIB_DIR)/tcp.h $(LIB_DIR)/stopwatch.h
+$(BUILD_DIR)/challenge-3bc.o: $(CHALLENGE_3bc_SRC) $(LIB_DIR)/util.h $(LIB_DIR)/collections.h $(LIB_DIR)/tcp.h $(LIB_DIR)/stopwatch.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Generate object files for library modules
