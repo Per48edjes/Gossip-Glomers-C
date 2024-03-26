@@ -30,17 +30,19 @@ bool queue_is_empty(Queue* queue);
 // Takes ownership of `queue`.
 void queue_free(Queue* queue);
 
-
-
-
 Conch* conch_init(int64_t initial_conch_value);
 void conch_checkin(Conch* conch, int64_t new_conch_value);
 int64_t conch_checkout(Conch* conch);
 bool conch_is_available(Conch* conch);
 void conch_free(Conch* conch);
 
-List* list_init(void);
+// Returns an owned `List`.
+List* list_init(void (*free_funtion)(void*));
+
+// Borrows `list`. Takes ownership of `data`.
 void list_append(List* list, void* data);
+
+// Borrows `list`. Returns an owned pointer.
 void* list_pop(List* list);
 void* list_get_at(List* list, size_t index);
 void list_set_at(List* list, size_t index, void* data);

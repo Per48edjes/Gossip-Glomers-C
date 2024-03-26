@@ -50,6 +50,25 @@ To run the solution to [Challenge 2: Unique ID Generation](https://fly.io/dist-s
 maelstrom test -w unique-ids --bin build/challenge-2.out --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
 ```
 
+## Challenge 3a
+
+To run the solution to [Challenge 3a: Single Node Broadcast](https://fly.io/dist-sys/3a/), execute the following (in `/app`) in the container (after building the project):
+
+```bash
+maelstrom test -w broadcast --bin build/challenge-3a.out --node-count 1 --time-limit 20 --rate 10
+```
+
+## Challenges 3b & 3c
+
+To run the solution to [Challenge 3b: Multi Node Broadcast](https://fly.io/dist-sys/3b/) and [Challenge 3b: Fault Tolerant Broadcast](https://fly.io/dist-sys/3c/),, execute the following (in `/app`) in the container (after building the project):
+
+```bash
+# Challenge 3b
+maelstrom test -w broadcast --bin build/challenge-3bc.out --node-count 5 --time-limit 20 --rate 10
+
+# Challenge 3c
+maelstrom test -w broadcast --bin build/challenge-3bc.out --node-count 5 --time-limit 20 --rate 10 --nemesis partition
+```
 
 ---
 
