@@ -60,7 +60,7 @@ maelstrom test -w broadcast --bin build/challenge-3a.out --node-count 1 --time-l
 
 ## Challenges 3b & 3c
 
-To run the solution to [Challenge 3b: Multi Node Broadcast](https://fly.io/dist-sys/3b/) and [Challenge 3b: Fault Tolerant Broadcast](https://fly.io/dist-sys/3c/),, execute the following (in `/app`) in the container (after building the project):
+To run the solution to [Challenge 3b: Multi Node Broadcast](https://fly.io/dist-sys/3b/) and [Challenge 3c: Fault Tolerant Broadcast](https://fly.io/dist-sys/3c/), execute the following (in `/app`) in the container (after building the project):
 
 ```bash
 # Challenge 3b
