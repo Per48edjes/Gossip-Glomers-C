@@ -272,6 +272,11 @@ typedef struct KeyValuePair
 // FNV-1a hash function
 static uint64_t hash_key(const char* key)
 {
+    if (key == NULL)
+    {
+        fprintf(stderr, "Error: hash_key: key is NULL\n");
+        exit(EXIT_FAILURE);
+    }
     uint64_t hash = FNV_OFFSET;
     for (const char* c = key; *c != '\0'; c++)
     {
