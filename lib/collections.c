@@ -254,8 +254,16 @@ void* list_pop(List* list)
 
 size_t list_length(List* list) { return list->length; }
 
+bool list_is_empty(List* list) { return list->length == 0; }
+
 void list_free(List* list)
 {
+    while (!list_is_empty(list))
+    {
+        void* item = list_pop(list);
+        fprintf(stdout, "Freeing item: %i\n", *(int*)item);
+        list->free_function(item);
+    }
     free(list->data);
     free(list);
 }

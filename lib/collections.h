@@ -44,9 +44,20 @@ void list_append(List* list, void* data);
 
 // Borrows `list`. Returns an owned pointer.
 void* list_pop(List* list);
+
+// Borrows `list`. Returns an owned pointer.
 void* list_get_at(List* list, size_t index);
+
+// Borrows `list`. Takes ownership of `list`.
 void list_set_at(List* list, size_t index, void* data);
+
+// Borrows `list`.
 size_t list_length(List* list);
+
+// Borrows `list`.
+bool list_is_empty(List* list);
+
+// Takes ownership of `list`.
 void list_free(List* list);
 
 Dictionary* dictionary_init(void (*elem_free)(void*));
