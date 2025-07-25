@@ -370,20 +370,29 @@ static void dictionary_rebuild(Dictionary* dictionary)
     }
     temp_dictionary->max_length = new_max_length;
     temp_dictionary->key_value_pairs = new_key_value_pairs;
+    temp_dictionary->elem_free = dictionary->elem_free; // Copy the elem_free function
+    temp_dictionary->length = 0;
+    
+    // Insert all key-value pairs from old dictionary to temp dictionary
     for (size_t i = 0; i < dictionary->max_length; i++)
     {
         KeyValuePair key_value_pair = dictionary->key_value_pairs[i];
-        dictionary_set(temp_dictionary, key_value_pair.key,
-                       key_value_pair.value);
+        if (key_value_pair.key != NULL) {
+            dictionary_set(temp_dictionary, key_value_pair.key,
+                         key_value_pair.value);
+        }
     }
-
-    swap((void**)&dictionary->key_value_pairs,
-         (void**)&temp_dictionary->key_value_pairs);
-    swap((void**)&dictionary->max_length, (void**)&temp_dictionary->max_length);
-
-    dictionary_free(temp_dictionary);
-    dictionary->max_length = temp_dictionary->max_length;
+    
+    // Free the old key_value_pairs array but not the individual elements
+    free(dictionary->key_value_pairs);
+    
+    // Copy the new array to the original dictionary
     dictionary->key_value_pairs = temp_dictionary->key_value_pairs;
+    dictionary->max_length = temp_dictionary->max_length;
+    dictionary->length = temp_dictionary->length;
+    
+    // Free just the temp_dictionary struct (not its contents)
+    free(temp_dictionary);
 }
 
 void dictionary_set(Dictionary* dictionary, const char* key, void* value)
