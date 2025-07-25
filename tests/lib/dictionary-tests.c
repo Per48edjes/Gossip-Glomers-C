@@ -18,8 +18,20 @@ void test_instantiate_and_populate_dictionary()
 
     for (size_t i = 0; i < num_keys; i++)
     {
-        dictionary_set(big_dictionary, keys[i], &values[i]);
+        int* value = malloc(sizeof(int));
+        *value = values[i];
+        dictionary_set(big_dictionary, keys[i], value);
     }
+    
+    // Verify that all values can be retrieved correctly
+    for (size_t i = 0; i < num_keys; i++)
+    {
+        int* retrieved_value = (int*)dictionary_get(big_dictionary, keys[i]);
+        TEST_ASSERT_EQUAL_INT(values[i], *retrieved_value);
+    }
+    
+    // Free the dictionary when done
+    dictionary_free(big_dictionary);
 }
 
 void tearDown(void) {}
