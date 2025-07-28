@@ -58,3 +58,6 @@ dkms.conf
 maelstrom/
 store/
 build/
+
+## Claude Code
+.claude/
