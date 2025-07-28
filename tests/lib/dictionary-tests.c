@@ -50,7 +50,7 @@ void test_dictionary_length()
     // Add multiple items and test length
     for (int i = 0; i < 10; i++) {
         char key[10];
-        sprintf(key, "key%d", i);
+        snprintf(key, sizeof(key), "key%d", i);
         
         int* val = malloc(sizeof(int));
         *val = i * 10;
@@ -152,7 +152,7 @@ void test_dictionary_rebuild()
     // So we need to add at least 8 items to trigger a rebuild
     for (int i = 0; i < 30; i++) {
         char key[20];
-        sprintf(key, "rebuild-key%d", i);
+        snprintf(key, sizeof(key), "rebuild-key%d", i);
         
         int* val = malloc(sizeof(int));
         *val = i * 100;
