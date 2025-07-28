@@ -375,15 +375,42 @@ static void dictionary_rebuild(Dictionary* dictionary)
     temp_dictionary->elem_free = dictionary->elem_free; // Copy the elem_free function
     temp_dictionary->length = 0;
     
+    // This array stores the duplicate keys created by dictionary_set
+    const char** duplicate_keys = malloc(dictionary->length * sizeof(char*));
+    if (duplicate_keys == NULL)
+    {
+        free(new_key_value_pairs);
+        free(temp_dictionary);
+        fprintf(stderr, "Error: dictionary_rebuild: malloc failed for key tracking\n");
+        exit(EXIT_FAILURE);
+    }
+    size_t duplicate_keys_count = 0;
+    
     // Insert all key-value pairs from old dictionary to temp dictionary
     for (size_t i = 0; i < dictionary->max_length; i++)
     {
-        KeyValuePair key_value_pair = dictionary->key_value_pairs[i];
-        if (key_value_pair.key != NULL) {
-            dictionary_set(temp_dictionary, key_value_pair.key,
-                         key_value_pair.value);
+        KeyValuePair* key_value_pair = &dictionary->key_value_pairs[i];
+        if (key_value_pair->key != NULL) {
+            // Use dictionary_set to add to temp dictionary (which creates duplicate keys)
+            dictionary_set(temp_dictionary, key_value_pair->key, key_value_pair->value);
+            
+            // Find the duplicate key in the temp dictionary
+            DictionaryLookupResult lookup_result = dictionary_lookup(temp_dictionary, key_value_pair->key);
+            if (lookup_result.found) {
+                // Keep track of the duplicated key
+                duplicate_keys[duplicate_keys_count++] = temp_dictionary->key_value_pairs[lookup_result.index].key;
+                
+                // Replace with original key
+                temp_dictionary->key_value_pairs[lookup_result.index].key = key_value_pair->key;
+            }
         }
     }
+    
+    // Free all duplicated keys we've tracked (they've been replaced with originals)
+    for (size_t i = 0; i < duplicate_keys_count; i++) {
+        free((void*)duplicate_keys[i]);
+    }
+    free(duplicate_keys);
     
     // Store the old key_value_pairs to free after swapping
     KeyValuePair* old_key_value_pairs = dictionary->key_value_pairs;
