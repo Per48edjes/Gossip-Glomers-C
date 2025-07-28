@@ -383,15 +383,12 @@ static void dictionary_rebuild(Dictionary* dictionary)
         }
     }
     
-    // Free the old key_value_pairs array but not the individual elements
-    free(dictionary->key_value_pairs);
+    // Use swap to exchange pointers between dictionaries
+    swap((void**)&dictionary->key_value_pairs, (void**)&temp_dictionary->key_value_pairs);
+    swap((void**)&dictionary->max_length, (void**)&temp_dictionary->max_length);
+    swap((void**)&dictionary->length, (void**)&temp_dictionary->length);
     
-    // Copy the new array to the original dictionary
-    dictionary->key_value_pairs = temp_dictionary->key_value_pairs;
-    dictionary->max_length = temp_dictionary->max_length;
-    dictionary->length = temp_dictionary->length;
-    
-    // Free just the temp_dictionary struct (not its contents)
+    // Free just the temp_dictionary struct (not its contents which are now in the original dictionary)
     free(temp_dictionary);
 }
 
