@@ -119,7 +119,7 @@ void test_dictionary_collision_handling()
     // Add 100 items with generated keys
     for (int i = 0; i < 100; i++) {
         char key[20];
-        sprintf(key, "key%d", i);
+        snprintf(key, sizeof(key), "key%d", i);
         
         int* val = malloc(sizeof(int));
         *val = i;
@@ -129,7 +129,7 @@ void test_dictionary_collision_handling()
     // Verify all items can be retrieved
     for (int i = 0; i < 100; i++) {
         char key[20];
-        sprintf(key, "key%d", i);
+        snprintf(key, sizeof(key), "key%d", i);
         
         int* val = dictionary_get(dict, key);
         TEST_ASSERT_EQUAL_INT(i, *val);
@@ -162,7 +162,7 @@ void test_dictionary_rebuild()
     // Verify all items are still accessible after rebuild
     for (int i = 0; i < 30; i++) {
         char key[20];
-        sprintf(key, "rebuild-key%d", i);
+        snprintf(key, sizeof(key), "rebuild-key%d", i);
         
         TEST_ASSERT_TRUE(dictionary_contains(dict, key));
         int* val = dictionary_get(dict, key);
