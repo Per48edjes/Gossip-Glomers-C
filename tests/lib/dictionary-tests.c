@@ -39,6 +39,6 @@ void tearDown(void) {}
 int main(void)
 {
     UNITY_BEGIN();
-    test_instantiate_and_populate_dictionary();
+    RUN_TEST(test_instantiate_and_populate_dictionary);
     return UNITY_END();
 }

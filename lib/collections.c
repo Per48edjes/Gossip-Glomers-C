@@ -313,6 +313,7 @@ Dictionary* dictionary_init(void (*elem_free)(void*))
         calloc(INITIAL_DICTIONARY_MAX_LENGTH, sizeof(KeyValuePair));
     if (dictionary->key_value_pairs == NULL)
     {
+        free(dictionary);  // Free dictionary if key_value_pairs allocation fails
         fprintf(stderr, "Error: dictionary_init: malloc failed\n");
         exit(EXIT_FAILURE);
     }
@@ -365,6 +366,7 @@ static void dictionary_rebuild(Dictionary* dictionary)
         calloc(new_max_length, sizeof(KeyValuePair));
     if (new_key_value_pairs == NULL)
     {
+        free(temp_dictionary);  // Free temp_dictionary if calloc fails
         fprintf(stderr, "Error: dictionary_rebuild: calloc failed\n");
         exit(EXIT_FAILURE);
     }
@@ -383,12 +385,16 @@ static void dictionary_rebuild(Dictionary* dictionary)
         }
     }
     
+    // Store the old key_value_pairs to free after swapping
+    KeyValuePair* old_key_value_pairs = dictionary->key_value_pairs;
+    
     // Use swap to exchange pointers between dictionaries
     swap((void**)&dictionary->key_value_pairs, (void**)&temp_dictionary->key_value_pairs);
     swap((void**)&dictionary->max_length, (void**)&temp_dictionary->max_length);
     swap((void**)&dictionary->length, (void**)&temp_dictionary->length);
     
-    // Free just the temp_dictionary struct (not its contents which are now in the original dictionary)
+    // Free the old key_value_pairs array and temp_dictionary struct
+    free(old_key_value_pairs);
     free(temp_dictionary);
 }
 
